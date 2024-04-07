@@ -353,20 +353,26 @@ const IssueModal: React.FC<IssueModalProps> = ({
 }) => {
   const token = getAccessToken();
   const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const loadComments = useCallback(async () => {
-    if (loading) return;
-
-    setLoading(true);
-    const newComments = await fetchComments(token, issue.number);
-    setComments(newComments);
-    setLoading(false);
-  }, [comments.length, loading]);
-
+  // Separate effect for handling modal opening actions
   useEffect(() => {
+    const loadComments = async () => {
+      if (!isOpen) return; // Only proceed if the modal is open
+      setIsLoading(true);
+      try {
+        const newComments = await fetchComments(token, issue.number);
+        setComments(newComments);
+      } catch (error) {
+        console.error("Failed to load comments:", error);
+        // Optionally, handle the error, e.g., show a toast notification
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     loadComments();
-  }, []);
+  }, [isOpen, issue.number, token]); // Depend on isOpen to control fetch initiation
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="6xl">
@@ -380,18 +386,17 @@ const IssueModal: React.FC<IssueModalProps> = ({
             reloadIssues={onIssueReload}
             closeModal={onClose}
           />
-          {comments.map((comment) => (
-            <React.Fragment>
-              <Box h="20px" w="3px" ml="100px" bg="gray" />
-
-              <CommentCard key={comment.id} comment={comment} />
-            </React.Fragment>
-          ))}
-          <Box>{loading && <Spinner />}</Box>
+          {isLoading ? (
+            <Spinner />
+          ) : (
+            comments.map((comment) => (
+              <React.Fragment key={comment.id}>
+                <Box h="20px" w="3px" ml="100px" bg="gray" />
+                <CommentCard comment={comment} />
+              </React.Fragment>
+            ))
+          )}
         </ModalBody>
-        {/* <ModalFooter>
-          <Button colorScheme="blue" onClick={onClose}>關閉</Button>
-        </ModalFooter> */}
       </ModalContent>
     </Modal>
   );

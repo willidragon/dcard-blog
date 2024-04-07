@@ -1,64 +1,109 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { 
-  Box, Text, Badge, Stack, HStack, VStack, Image, Flex, Button,
-  Tag, SimpleGrid, Spinner, useColorModeValue, useDisclosure, Link, Divider
+import {
+  Box,
+  Text,
+  Badge,
+  Stack,
+  HStack,
+  VStack,
+  Image,
+  Flex,
+  Button,
+  Tag,
+  SimpleGrid,
+  Spinner,
+  useColorModeValue,
+  useDisclosure,
+  Link,
+  Divider,
 } from "@chakra-ui/react";
 import { useInView } from "react-intersection-observer";
-import { Remarkable } from 'remarkable';
+import { Remarkable } from "remarkable";
 
 import IssueModal from "./IssueModal";
-import { Issue } from "@/types/Issue"
+import { Issue } from "@/types/Issue";
 import { fetchIssues } from "@/api/issue";
 import { getAccessToken } from "@/utils/githubToken";
 import { formatDate, truncate } from "@/utils/stringUtils";
-import { reactionsIcons } from '@/utils/iconUtils';
+import { reactionsIcons } from "@/utils/iconUtils";
 
-const IssueCard = ({ issue, reloadIssues }: { 
-  issue: Issue,
-  reloadIssues: () => void
+const IssueCard = ({
+  issue,
+  reloadIssues,
+}: {
+  issue: Issue;
+  reloadIssues: () => void;
 }) => {
   const md = new Remarkable();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <Box borderWidth="1px" borderRadius="lg" overflow="hidden" w="100%" cursor="pointer"
-      p={4} bg={useColorModeValue("white", "gray.700")} onClick={onOpen}>
+    <Box
+      borderWidth="1px"
+      borderRadius="lg"
+      overflow="hidden"
+      w="100%"
+      cursor="pointer"
+      p={4}
+      bg={useColorModeValue("white", "gray.700")}
+      onClick={onOpen}
+    >
       <Flex justify="space-between" align="center">
         <Text fontSize="24px" fontWeight="bold">
-          {issue.title} <Text as="span" fontSize="18px" color="gray.500">#{issue.number}</Text>
+          {issue.title}{" "}
+          <Text as="span" fontSize="18px" color="gray.500">
+            #{issue.number}
+          </Text>
         </Text>
         <Box>
-          {issue.labels.map(label => (
+          {issue.labels.map((label) => (
             <Tag key={label.id} ml={2} color="white" bg={`#${label.color}`}>
               {label.name}
             </Tag>
           ))}
         </Box>
       </Flex>
-      <Text mt={2} noOfLines={4} height="80px" overflow="hidden"
-        dangerouslySetInnerHTML={{__html: md.render(truncate(issue.body, 200))}}
+      <Text
+        mt={2}
+        noOfLines={4}
+        height="80px"
+        overflow="hidden"
+        dangerouslySetInnerHTML={{
+          __html: md.render(truncate(issue.body, 200)),
+        }}
       />
       <Flex mt={4} justify="space-between" alignItems="center">
         <HStack>
-          {Object.entries(issue.reactions).map(([key, value]) => (
-            reactionsIcons[key] && value > 0 ? 
-            <Flex key={key} gap='4px' align='center' padding='2px 4px'
-              border='1px' borderRadius='2px' shadow="md">
-              {reactionsIcons[key]} {value}
-            </Flex> : null
-          ))}
+          {Object.entries(issue.reactions).map(([key, value]) =>
+            reactionsIcons[key] && value > 0 ? (
+              <Flex
+                key={key}
+                gap="4px"
+                align="center"
+                padding="2px 4px"
+                border="1px"
+                borderRadius="2px"
+                shadow="md"
+              >
+                {reactionsIcons[key]} {value}
+              </Flex>
+            ) : null
+          )}
         </HStack>
         <Text fontSize="sm">Updated at {formatDate(issue.updated_at)}</Text>
       </Flex>
-      <IssueModal issue={issue} isOpen={isOpen} 
-        onClose={onClose} onIssueReload={reloadIssues}
+      <IssueModal
+        issue={issue}
+        isOpen={isOpen}
+        onClose={onClose}
+        onIssueReload={reloadIssues}
       />
     </Box>
   );
 };
 
 const InfiniteIssuesList = () => {
-  const token = getAccessToken();
+  const token = getAccessToken(); // Assuming getAccessToken does not violate hooks rules
   const [issues, setIssues] = useState<Issue[]>([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -66,8 +111,7 @@ const InfiniteIssuesList = () => {
   const { ref, inView } = useInView();
 
   const loadMoreIssues = useCallback(async () => {
-    if (loading || !hasMore) 
-      return;
+    if (loading || !hasMore) return;
 
     setLoading(true);
     const newIssues = await fetchIssues(token, page);
@@ -75,9 +119,8 @@ const InfiniteIssuesList = () => {
     setPage((prev) => prev + 1);
     setLoading(false);
 
-    if (newIssues.length < 10) 
-      setHasMore(false);
-  }, [page, loading, hasMore, issues.length]);
+    if (newIssues.length < 10) setHasMore(false);
+  }, [page, loading, hasMore, token]); // Updated dependencies
 
   const reloadIssues = async () => {
     setLoading(true);
@@ -90,18 +133,15 @@ const InfiniteIssuesList = () => {
 
   useEffect(() => {
     if (hasMore && inView) loadMoreIssues();
-  }, [inView]);
+  }, [inView, hasMore, loadMoreIssues]); // Correct dependencies here
 
   return (
     <VStack spacing="16px" padding="32px">
-      {issues.map(issue => (
-        <IssueCard key={issue.id} issue={issue} reloadIssues={reloadIssues}/>
+      {issues.map((issue) => (
+        <IssueCard key={issue.id} issue={issue} reloadIssues={reloadIssues} />
       ))}
       <Box ref={ref}>
-        {hasMore ? 
-          loading && <Spinner /> : 
-          <Text>No more posts</Text>
-        }
+        {hasMore ? loading && <Spinner /> : <Text>No more posts</Text>}
       </Box>
     </VStack>
   );
