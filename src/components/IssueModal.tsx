@@ -1,21 +1,74 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, 
   ModalCloseButton, Button, useDisclosure, Text, Box, Badge, Flex, Stack,
-  Link, useColorModeValue, HStack, Image, Divider, Tag
+  Link, useColorModeValue, HStack, Image, Divider, Tag, Input, Textarea, useToast
 } from '@chakra-ui/react';
 
 import { Issue } from "@/types/Issue"
 import { reactionsIcons } from '@/utils/iconUtils';
 import { formatDate, truncate } from "@/utils/stringUtils";
+import { updateIssue, closeIssue } from '@/utils/issue';
+import { getAccessToken } from "@/utils/githubToken";
+import { error } from 'console';
 
 interface IssueModalProps {
   issue: Issue;
   isOpen: boolean;
   onClose: () => void;
+  onIssueUpdated: () => void;
 }
 
-const IssueModal: React.FC<IssueModalProps> = ({ issue, isOpen, onClose }) => {
+const IssueModal: React.FC<IssueModalProps> = ({ issue, isOpen, onClose, onIssueUpdated }) => {
+  const token = getAccessToken();
+  const [editMode, setEditMode] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(issue.title);
+  const [editedBody, setEditedBody] = useState(issue.body);
+  const toast = useToast();
+
+  const handleEdit = () => {
+    updateIssue(token, issue.number, editedTitle, editedBody)
+      .then(res => toast({
+        title: 'Success!',
+        description: res.message,
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      }))
+      .catch(error => toast({
+        title: 'Failid!',
+        description: error.message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      }))
+
+    setEditMode(false);
+    onClose();
+    onIssueUpdated();
+  };
+
+  const handleDelete = () => {
+    closeIssue(token, issue.number)
+      .then(res => toast({
+        title: 'Success!',
+        description: res.message,
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      }))
+      .catch(error => toast({
+        title: 'Failid!',
+        description: error.message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      }))
+
+    onClose();
+    onIssueUpdated();
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size='6xl'>
       <ModalOverlay />
@@ -23,19 +76,37 @@ const IssueModal: React.FC<IssueModalProps> = ({ issue, isOpen, onClose }) => {
         <ModalBody >
         <Flex borderWidth="1px" borderRadius="lg" overflow="hidden" w="100%" gap="12px"
           p={4} bg={useColorModeValue("white", "gray.700")} justify='space-between'>
-          <Stack justify="space-between">
+          <Stack justify="space-between" flexGrow='1'>
             <Box>
-              <Flex justify="space-between" align="center">
+              {editMode ? (
+                <Input
+                  value={editedTitle}
+                  onChange={(e) => setEditedTitle(e.target.value)}
+                  size="lg"
+                  fontWeight="bold"
+                  w='100%'
+                />
+              ) : (
                 <Link fontSize="24px" fontWeight="bold" href={issue.url}>
-                  {issue.title} 
+                  {editedTitle}
                   <Text as="span" fontSize="18px" color="gray.500">#{issue.number}</Text>
                 </Link>
-              </Flex>
-              <Text mt={2} noOfLines={4} height="80px" overflow="hidden">
-                {issue.body}
-              </Text>
+              )}
+              {editMode ? (
+                <Textarea
+                  value={editedBody}
+                  onChange={(e) => setEditedBody(e.target.value)}
+                  mt={2}
+                  height="150px"
+                  flexGrow='1'
+                />
+              ) : (
+                <Text flexGrow='1' mt={2} noOfLines={4} height="80px" overflow="hidden">
+                  {editedBody}
+                </Text>
+              )}
             </Box>        
-            <HStack justifySelf='end' alignSelf='end' justify="space-between" alignItems="center">
+            <HStack justifySelf="start">
               {Object.entries(issue.reactions).map(([key, value]) => (
                 reactionsIcons[key] && value > 0 ? 
                 <Flex key={key} gap='4px' align='center' padding='2px 4px'
@@ -45,7 +116,7 @@ const IssueModal: React.FC<IssueModalProps> = ({ issue, isOpen, onClose }) => {
               ))}
             </HStack>
           </Stack>
-          <Stack w='200px'>
+          <Stack w='200px' justifySelf='start'>
             <Stack>
               <Text>User: </Text>
               <Flex gap='10px'>
@@ -61,9 +132,10 @@ const IssueModal: React.FC<IssueModalProps> = ({ issue, isOpen, onClose }) => {
             </Stack>
             <Stack>
               <Text>Label: </Text>
-              <Flex>
+              <Flex flexWrap="wrap">
                 {issue.labels.map(label => (
-                  <Tag key={label.id} ml={2} w='fit-content'
+                  <Tag key={label.id} ml={2} mt={2} minW='fit-content'
+                    whiteSpace='nowrap'
                     color="white" bg={`#${label.color}`}>
                     {label.name}
                   </Tag>
@@ -90,8 +162,15 @@ const IssueModal: React.FC<IssueModalProps> = ({ issue, isOpen, onClose }) => {
         </ModalBody>
         <ModalFooter>
           <Flex gap='12px'>
-            <Button colorScheme="green" onClick={onClose}>編輯</Button>
-            <Button colorScheme="red" onClick={onClose}>刪除</Button>
+            {editMode ? (
+              <Button colorScheme="green" onClick={handleEdit}>保存</Button>
+            ) : (
+              <React.Fragment>
+                <Button colorScheme="green" onClick={() => setEditMode(true)}>編輯</Button>
+                <Button colorScheme="red" onClick={handleDelete}>刪除</Button>
+              </React.Fragment>
+            )}
+            
             <Button colorScheme="blue" onClick={onClose}>關閉</Button>
           </Flex>
         </ModalFooter>

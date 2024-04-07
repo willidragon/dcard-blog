@@ -123,12 +123,15 @@ export const fetchIssues = async (
   per_page: number = 10
 ): Promise<Issue[]> => {
   const { octokit, owner, repo } = createGitHubClient(token);
+  const nocache = new Date().getTime();
+
   const response = await octokit.request(`GET /repos/${owner}/${repo}/issues`, {
     owner,
     repo,
     per_page,
     page,
     state: "open",
+    nocache // avoid cache
   });
 
   // Transform each issue in the response

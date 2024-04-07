@@ -13,7 +13,10 @@ import { getAccessToken } from "@/utils/githubToken";
 import { formatDate, truncate } from "@/utils/stringUtils";
 import { reactionsIcons } from '@/utils/iconUtils';
 
-const IssueCard = ({ issue }: { issue: Issue }) => {
+const IssueCard = ({ issue, reloadIssues }: { 
+  issue: Issue,
+  reloadIssues: () => void
+}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
@@ -46,7 +49,9 @@ const IssueCard = ({ issue }: { issue: Issue }) => {
         </HStack>
         <Text fontSize="sm">Updated at {formatDate(issue.updated_at)}</Text>
       </Flex>
-      <IssueModal issue={issue} isOpen={isOpen} onClose={onClose} />
+      <IssueModal issue={issue} isOpen={isOpen} 
+        onClose={onClose} onIssueUpdated={reloadIssues}
+      />
     </Box>
   );
 };
@@ -65,7 +70,6 @@ const InfiniteIssuesList = () => {
 
     setLoading(true);
     const newIssues = await fetchIssues(token, page);
-    console.log(newIssues);
     setIssues((prev) => [...prev, ...newIssues]);
     setPage((prev) => prev + 1);
     setLoading(false);
@@ -74,6 +78,15 @@ const InfiniteIssuesList = () => {
       setHasMore(false);
   }, [page, loading, hasMore, issues.length]);
 
+  const reloadIssues = async () => {
+    setLoading(true);
+    setPage(1);
+    const newIssues = await fetchIssues(token, 1); // 重新从第一页开始加载
+    setIssues(newIssues);
+    setLoading(false);
+    setHasMore(newIssues.length === 10); // 假设每页有10条，如果少于10条则说明没有更多数据
+  };
+
   useEffect(() => {
     if (hasMore && inView) loadMoreIssues();
   }, [inView]);
@@ -81,12 +94,12 @@ const InfiniteIssuesList = () => {
   return (
     <VStack spacing="16px" padding="32px">
       {issues.map(issue => (
-        <IssueCard key={issue.id} issue={issue}/>
+        <IssueCard key={issue.id} issue={issue} reloadIssues={reloadIssues}/>
       ))}
       <Box ref={ref}>
         {hasMore ? 
           loading && <Spinner /> : 
-          <Text>No more posts</Text>          
+          <Text>No more posts</Text>
         }
       </Box>
     </VStack>
