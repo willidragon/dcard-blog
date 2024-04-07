@@ -11,11 +11,9 @@ const Navbar = () => {
     <Box bg={bg} color={color} px={4}>
       <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
         <Box>
-          <NextLink href="/" passHref>
-            <Link _hover={{ textDecoration: 'none' }} fontWeight="bold">
-              Github Issue Blog
-            </Link>
-          </NextLink>
+          <Link href="/" _hover={{ textDecoration: 'none' }} fontWeight="bold">
+            Github Issue Blog
+          </Link>
         </Box>
         <Flex alignItems={'center'}>
           {!session ? (
@@ -24,11 +22,9 @@ const Navbar = () => {
             </Button>
           ) : (
             <Flex gap={2} align="center">
-              <NextLink href="/post/create" passHref>
-                <Button as={Link} colorScheme="pink" size="sm">
-                  Create Post
-                </Button>
-              </NextLink>
+              <Button as={Link} colorScheme="green" size="sm">
+                Create Post
+              </Button>
               <Image
                 borderRadius='full'
                 boxSize='40px'

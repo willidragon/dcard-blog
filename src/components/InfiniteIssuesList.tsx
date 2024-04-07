@@ -1,45 +1,27 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Box, Text, Badge, Stack, HStack, VStack, Spacer, 
-  Tag, SimpleGrid, Spinner, useColorModeValue, Flex } from "@chakra-ui/react";
+import { 
+  Box, Text, Badge, Stack, HStack, VStack, Image, Flex, Button,
+  Tag, SimpleGrid, Spinner, useColorModeValue, useDisclosure, Link, Divider
+} from "@chakra-ui/react";
 import { FaThumbsUp, FaGrin, FaSadTear, FaHeart, FaSurprise, FaEye, FaLaugh, FaRocket } from "react-icons/fa";
 import { useInView } from "react-intersection-observer";
 
-import { fetchIssues } from "@/utils/issue";
+import IssueModal from "./IssueModal";
 import { Issue } from "@/types/Issue"
+import { fetchIssues } from "@/utils/issue";
 import { getAccessToken } from "@/utils/githubToken";
+import { formatDate, truncate } from "@/utils/stringUtils";
+import { reactionsIcons } from '@/utils/iconUtils';
 
 const IssueCard = ({ issue }: { issue: Issue }) => {
-  // 格式化时间显示
-  const formatDate = (dateString: Date) => {
-    const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "long", day: "numeric" };
-    return dateString.toLocaleDateString(undefined, options);
-  };
-
-  // 截断长文本
-  const truncate = (str: string, length = 100, ending = "...") => {
-    if (str.length > length) {
-      return str.substring(0, length - ending.length) + ending;
-    } else {
-      return str;
-    }
-  };
-
-  // 将reactions映射到相应的图标
-  const reactionsIcons: { [key: string]: JSX.Element | undefined } = {
-    "+1": <FaThumbsUp />,
-    "-1": <FaSadTear />,
-    laugh: <FaLaugh />,
-    hooray: <FaRocket />,
-    confused: <FaSurprise />,
-    heart: <FaHeart />,
-    eyes: <FaEye />,
-  };
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <Box borderWidth="1px" borderRadius="lg" overflow="hidden" w="100%" p={4} bg={useColorModeValue("white", "gray.700")}>
+    <Box borderWidth="1px" borderRadius="lg" overflow="hidden" w="100%" cursor="pointer"
+      p={4} bg={useColorModeValue("white", "gray.700")} onClick={onOpen}>
       <Flex justify="space-between" align="center">
         <Text fontSize="24px" fontWeight="bold">
-          [Issue#{issue.number}] {issue.title}
+          {issue.title} <Text as="span" fontSize="18px" color="gray.500">#{issue.number}</Text>
         </Text>
         <Box>
           {issue.labels.map(label => (
@@ -62,13 +44,12 @@ const IssueCard = ({ issue }: { issue: Issue }) => {
             </Flex> : null
           ))}
         </HStack>
-        <Spacer />
         <Text fontSize="sm">Updated at {formatDate(issue.updated_at)}</Text>
       </Flex>
+      <IssueModal issue={issue} isOpen={isOpen} onClose={onClose} />
     </Box>
   );
 };
-
 
 const InfiniteIssuesList = () => {
   const token = getAccessToken();
