@@ -1,81 +1,5 @@
 import { Issue } from "@/types/Issue";
-import { createGitHubClient } from "./githubClient";
-
-// export async function fetchGitHubIssues(token: string) {
-//   const octokit = new Octokit({ auth: token });
-//   const owner = process.env.GITHUB_OWNER;
-//   const repo = process.env.GITHUB_REPO;
-//   // const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues`, {
-//   //   method: 'GET',
-//   //   headers: {
-//   //     'Accept': 'application/vnd.github+json',
-//   //     'Authorization': `Bearer ${token}`,
-//   //     'X-GitHub-Api-Version': '2022-11-28'
-//   //   }
-//   // });
-//   const response = await octokit.request(`GET /repos/${owner}/${repo}/issues`, {
-//     owner,
-//     repo,
-//     state: "open",
-//     headers: {
-//       'X-GitHub-Api-Version': '2022-11-28'
-//     }
-//   });
-//   // console.log(`response: ${response}`)
-//   // console.log('123~~')
-//   // if (!response.ok) {
-//   //   throw new Error(`Error fetching issues: ${response.statusText}`);
-//   // }
-
-//   // const issues: GitHubIssueList = await response.json();
-//   if (response.data) {
-//     console.log(response.data);
-//     return response.data;
-//   } else {
-//     throw new Error('Network response was not ok.');
-//     return [];
-//   }
-  
-//   // const octokit = new Octokit({ auth: accessToken });
-
-//   // const owner = process.env.GITHUB_OWNER!;
-//   // const repo = process.env.GITHUB_REPO!;
-
-//   // const response = await octokit.request(`GET /repos/${owner}/${repo}/issues`, {
-//   //   owner,
-//   //   repo,
-//   //   state: "open",
-//   //   headers: {
-//   //     'X-GitHub-Api-Version': '2022-11-28'
-//   //   }
-//   // });
-//   // console.log(response)
-//   // return response.data.map((issue: any) => {
-//   //   const { number, title, body, comments, labels, created_at, user } = issue;
-//   //   let short_body = body
-//   //     .split(" ")
-//   //     .filter((word: string) => word !== "")
-//   //     .slice(0, 16)
-//   //     .join(" ");
-//   //   if (body.length > short_body.length) {
-//   //     short_body += "...";
-//   //   }
-//   //   const createdAt = new Date(created_at).toLocaleString();
-//   //   return {
-//   //     number,
-//   //     title,
-//   //     body: short_body,
-//   //     comments,
-//   //     labels,
-//   //     createdAt,
-//   //     user: {
-//   //       id: user.id,
-//   //       username: user.login,
-//   //       avatar_url: user.avatar_url,
-//   //     },
-//   //   };
-//   // });
-// }
+import { createGitHubClient } from "../utils/githubClient";
 
 /**
  * Transforms the API response to a structured Issue object.
@@ -134,6 +58,8 @@ export const fetchIssues = async (
     nocache // avoid cache
   });
 
+  console.log('fetchIssues')
+  console.log(response.data)
   // Transform each issue in the response
   return response.data.map((issue: any) => transformApiResponseToIssue(issue));
 };

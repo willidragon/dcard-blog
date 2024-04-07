@@ -3,12 +3,12 @@ import {
   Box, Text, Badge, Stack, HStack, VStack, Image, Flex, Button,
   Tag, SimpleGrid, Spinner, useColorModeValue, useDisclosure, Link, Divider
 } from "@chakra-ui/react";
-import { FaThumbsUp, FaGrin, FaSadTear, FaHeart, FaSurprise, FaEye, FaLaugh, FaRocket } from "react-icons/fa";
 import { useInView } from "react-intersection-observer";
+import { Remarkable } from 'remarkable';
 
 import IssueModal from "./IssueModal";
 import { Issue } from "@/types/Issue"
-import { fetchIssues } from "@/utils/issue";
+import { fetchIssues } from "@/api/issue";
 import { getAccessToken } from "@/utils/githubToken";
 import { formatDate, truncate } from "@/utils/stringUtils";
 import { reactionsIcons } from '@/utils/iconUtils';
@@ -17,6 +17,7 @@ const IssueCard = ({ issue, reloadIssues }: {
   issue: Issue,
   reloadIssues: () => void
 }) => {
+  const md = new Remarkable();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
@@ -34,9 +35,9 @@ const IssueCard = ({ issue, reloadIssues }: {
           ))}
         </Box>
       </Flex>
-      <Text mt={2} noOfLines={4} height="80px" overflow="hidden">
-        {truncate(issue.body, 200)}
-      </Text>
+      <Text mt={2} noOfLines={4} height="80px" overflow="hidden"
+        dangerouslySetInnerHTML={{__html: md.render(truncate(issue.body, 200))}}
+      />
       <Flex mt={4} justify="space-between" alignItems="center">
         <HStack>
           {Object.entries(issue.reactions).map(([key, value]) => (
@@ -50,7 +51,7 @@ const IssueCard = ({ issue, reloadIssues }: {
         <Text fontSize="sm">Updated at {formatDate(issue.updated_at)}</Text>
       </Flex>
       <IssueModal issue={issue} isOpen={isOpen} 
-        onClose={onClose} onIssueUpdated={reloadIssues}
+        onClose={onClose} onIssueReload={reloadIssues}
       />
     </Box>
   );

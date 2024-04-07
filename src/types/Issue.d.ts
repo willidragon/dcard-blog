@@ -1,27 +1,10 @@
-export type User = {
-  id: number;
-  name: string;
-  avatar_url: string;
-  home_url: string;
-}
+import { User, Reactions } from "@/types/User";
 
 export type Label = {
   id: number;
   name: string;
   description: string;
   color: string;
-}
-
-export type Reactions = {
-  '+1': number;
-  '-1': number;
-  confused: number;
-  eyes: number;
-  heart: number;
-  hooray: number;
-  laugh: number;
-  rocket: number;
-  total_count: number;
 }
 
 export type Issue = {
