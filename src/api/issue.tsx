@@ -55,11 +55,11 @@ export const fetchIssues = async (
     per_page,
     page,
     state: "open",
-    nocache // avoid cache
+    nocache, // avoid cache
   });
 
-  console.log('fetchIssues')
-  console.log(response.data)
+  console.log("fetchIssues");
+  console.log(response.data);
   // Transform each issue in the response
   return response.data.map((issue: any) => transformApiResponseToIssue(issue));
 };
@@ -71,14 +71,20 @@ export const fetchIssues = async (
  * @param issue_number - The number of the issue to fetch.
  * @returns A promise that resolves to a single Issue object.
  */
-export const fetchIssue = async (token: string, issue_number: number): Promise<Issue> => {
+export const fetchIssue = async (
+  token: string,
+  issue_number: number
+): Promise<Issue> => {
   const { octokit, owner, repo } = createGitHubClient(token);
-  const response = await octokit.request(`GET /repos/${owner}/${repo}/issues/${issue_number}`, {
-    owner,
-    repo,
-    issue_number,
-  });
-  
+  const response = await octokit.request(
+    `GET /repos/${owner}/${repo}/issues/${issue_number}`,
+    {
+      owner,
+      repo,
+      issue_number,
+    }
+  );
+
   return transformApiResponseToIssue(response.data);
 };
 
@@ -94,16 +100,19 @@ export const createIssue = async (
   token: string,
   title: string,
   body: string
-): Promise<{ status: string; message: string; }> => {
+): Promise<{ status: string; message: string }> => {
   const { octokit, owner, repo } = createGitHubClient(token);
 
   try {
-    const response = await octokit.request(`POST /repos/${owner}/${repo}/issues`, {
-      owner,
-      repo,
-      title,
-      body,
-    });
+    const response = await octokit.request(
+      `POST /repos/${owner}/${repo}/issues`,
+      {
+        owner,
+        repo,
+        title,
+        body,
+      }
+    );
 
     if (response.status !== 201) throw new Error("Failed to create issue!");
 
@@ -124,15 +133,18 @@ export const createIssue = async (
 export const closeIssue = async (
   token: string,
   issue_number: number
-): Promise<{ status: string; message: string; }> => {
+): Promise<{ status: string; message: string }> => {
   const { octokit, owner, repo } = createGitHubClient(token);
 
   try {
-    const response = await octokit.request(`PATCH /repos/${owner}/${repo}/issues/${issue_number}`, {
-      owner,
-      repo,
-      state: "closed",
-    });
+    const response = await octokit.request(
+      `PATCH /repos/${owner}/${repo}/issues/${issue_number}`,
+      {
+        owner,
+        repo,
+        state: "closed",
+      }
+    );
 
     if (response.status !== 200) throw new Error("Failed to close issue!");
 
@@ -157,16 +169,19 @@ export const updateIssue = async (
   issue_number: number,
   title: string,
   body: string
-): Promise<{ status: string; message: string; }> => {
+): Promise<{ status: string; message: string }> => {
   const { octokit, owner, repo } = createGitHubClient(token);
 
   try {
-    const response = await octokit.request(`PATCH /repos/${owner}/${repo}/issues/${issue_number}`, {
-      owner,
-      repo,
-      title,
-      body,
-    });
+    const response = await octokit.request(
+      `PATCH /repos/${owner}/${repo}/issues/${issue_number}`,
+      {
+        owner,
+        repo,
+        title,
+        body,
+      }
+    );
 
     if (response.status !== 200) throw new Error("Failed to update issue!");
 

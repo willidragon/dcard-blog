@@ -74,27 +74,27 @@ Let's get your development environment ready to work on this project. Here's wha
 
 **功能:**
 
-- [ ] GitHub Login
-  - [ ] 串接 GitHub OAuth,讓使用者有權限操作 GitHub API
-  - [ ] 詳見 [GitHub OAuth documentation](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow)
-  - [ ] 注意:在登入時需要求正確的 scope
-- [ ] Post Management
-  - [ ] 將 GitHub Issue 作為 Post,以 GitHub Issue 實作, 並將 close Issue 視為刪除 Post
-- [ ] User Interface
-  - [ ] 列表頁
-    - [ ] 第一次只能載入 10 筆
-    - [ ] 每當列表滾到底部時要需要自動發送 API 請求,並載入額外 10 筆,直到沒有更多文章
-  - [ ] 文章頁
-    - [ ] 顯示文章內容,並正確 render 出 markdown 的內容
-    - [ ] 使用者可以在此「編輯」、「刪除」
-  - [ ] 新增/編輯文章時,可以使用 Modal 或跳轉至新的頁面操作
-    - [ ] 至少需要使用 title 和 body 兩個欄位
-    - [ ] 表單驗證: title 為必填, body 至少需要 30 字
+- [x] GitHub Login
+  - [x] 串接 GitHub OAuth,讓使用者有權限操作 GitHub API
+  - [x] 詳見 [GitHub OAuth documentation](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow)
+  - [x] 注意:在登入時需要求正確的 scope
+- [x] Post Management
+  - [x] 將 GitHub Issue 作為 Post,以 GitHub Issue 實作, 並將 close Issue 視為刪除 Post
+- [x] User Interface
+  - [x] 列表頁
+    - [x] 第一次只能載入 10 筆
+    - [x] 每當列表滾到底部時要需要自動發送 API 請求,並載入額外 10 筆,直到沒有更多文章
+  - [x] 文章頁
+    - [x] 顯示文章內容,並正確 render 出 markdown 的內容
+    - [x] 使用者可以在此「編輯」、「刪除」
+  - [x] 新增/編輯文章時,可以使用 Modal 或跳轉至新的頁面操作
+    - [x] 至少需要使用 title 和 body 兩個欄位
+    - [x] 表單驗證: title 為必填, body 至少需要 30 字
 
 **加分條件:**
 
-- [ ] 使用 TypeScript
-- [ ] 使用 Next.js + App Router
-- [ ] 調校 Web Vitals 評分
-- [ ] 有處理錯誤及例外狀況(Error Handling)
-- [ ] 有部署至線上環境
+- [x] 使用 TypeScript
+- [x] 使用 Next.js + App Router
+- [x] 調校 Web Vitals 評分
+- [x] 有處理錯誤及例外狀況(Error Handling)
+- [x] 有部署至線上環境
